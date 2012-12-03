@@ -137,8 +137,8 @@ bool lineIntersect(struct vector a1, struct vector a2,
 	struct vector A = {a2.x - a1.x, a2.y - a1.y, 0.0f, 0.0f},
 		u1 = {b1.x - a1.x, b1.y - a1.y, 0.0f, 0.0f},
 			u2 = {b2.x - a1.x, b2.y - a1.y, 0.0f, 0.0f};
-	float aS1 = A.x * u1.x + A.y * u1.y,
-		aS2 = A.x * u2.x + A.y * u2.y;
+	float aS1 = A.x * u1.y - A.y * u1.x,
+		aS2 = A.x * u2.y - A.y * u2.x;
 	if(aS1 == 0 || aS2 == 0)
 		/* We don't consider it interesection if b1 or b2 is on A */
 		return false;
@@ -148,8 +148,8 @@ bool lineIntersect(struct vector a1, struct vector a2,
 		return false;
 	struct vector B = {b2.x - b1.x, b2.y - b1.y, 0.0f, 0.0f},
 		u3 = {a2.x - b1.x, a2.y - b1.y, 0.0f, 0.0f};
-	float bS1 = u1.x * B.x + u1.y * B.y,
-		bS2 = B.x * u3.x + B.y * u3.y;
+	float bS1 = u1.x * B.y - u1.y * B.x,
+		bS2 = B.x * u3.y - B.y * u3.x;
 	if((bS1 < 0 && bS2 < 0) ||
 		 (bS1 > 0 && bS2 > 0))
 		return false;

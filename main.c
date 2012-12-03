@@ -16,7 +16,7 @@
 #include "polygon.h"
 
 #define PI 3.141592653589793
-#define REFRESHMS 5
+#define REFRESHMS 1
 #define STARCOUNT 50
 #define STARSIZE 8
 
@@ -71,8 +71,8 @@ void display(void)
 
 void timer(int val)
 {
-	glutPostRedisplay();
 	glutTimerFunc(REFRESHMS, timer, val + 1);
+	glutPostRedisplay();
 }
 
 void drawStar(struct star *star)
@@ -98,6 +98,16 @@ void updateStar(unsigned i)
 		mtxFree(trans);
 		mtxFree(rotate);
 		if(polyInRect(stars[i].prevTranslated, 0.0f, 1.0f, 0.0f, 1.0f)) {
+			for(unsigned j = 0; j < i; j++) {
+				if(stars[j].valid) {
+					if(polyIntersect(stars[i].prevTranslated,
+													 stars[j].prevTranslated)) {
+						stars[i].valid = false;
+						stars[j].valid = false;
+						break;
+					}
+				}
+			}
 		}
 		else {
 			stars[i].valid = false;
@@ -123,6 +133,12 @@ void keypress(unsigned char key, int x, int y)
 	case 'f':
 		fill = !fill;
 		break;
+	case 'r':
+		for(int i = 0; i < STARCOUNT; i++) {
+			polyFree(stars[i].poly);
+			polyFree(stars[i].prevTranslated);
+		}
+		initStars();
 	}
 }
 
@@ -157,7 +173,7 @@ void initStars(void)
 		bool intersect = true;
 		do {	
 			tmp = rand();
-			stars[i].scale = tmp / RAND_MAX / 30.0f + 0.005f;
+			stars[i].scale = tmp / RAND_MAX / 35.0f + 0.005f;
 			struct matrix  *shift = mtxTranslate(stars[i].x,
 																					 stars[i].y,
 																					 0),
@@ -178,12 +194,10 @@ void initStars(void)
 																		stars[j].prevTranslated);
 				}
 				if(intersect) {
-					printf("Intersection\n");
 					stars[i].x += stars[j].scale * 4;
 				}
 			}
 			else {
-				printf("Outside Edge\n");
 				tmp = rand();
 				stars[i].x = (float)(tmp / RAND_MAX);
 				tmp = rand();
@@ -202,7 +216,7 @@ int main(int argc, char **argv)
 	glutInitWindowPosition(100, 10);
 	glutInitWindowSize(VIEWWIDTH + 2 * OFFWIDTH,
 										 VIEWHEIGHT + 2 * OFFHEIGHT);
-	glutCreateWindow("Program 2");
+	glutCreateWindow("Astaroids");
 	glutDisplayFunc(display);
 	glutReshapeFunc(resize);
 	glutKeyboardFunc(keypress);
