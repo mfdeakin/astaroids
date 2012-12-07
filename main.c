@@ -17,7 +17,7 @@
 
 #define PI 3.141592653589793
 #define REFRESHMS 1
-#define STARCOUNT 50
+#define STARCOUNT 1000
 #define STARSIZE 8
 
 struct star
@@ -100,7 +100,12 @@ void updateStar(unsigned i)
 		if(polyInRect(stars[i].prevTranslated, 0.0f, 1.0f, 0.0f, 1.0f)) {
 			for(unsigned j = 0; j < i; j++) {
 				if(stars[j].valid) {
-					if(polyIntersect(stars[i].prevTranslated,
+					float maxdist = stars[i].scale + stars[j].scale,
+						dx = stars[i].x - stars[j].x,
+						dy = stars[i].y - stars[j].y,
+						dist = dx * dx + dy * dy;
+					if(dist < maxdist * maxdist &&
+						 polyIntersect(stars[i].prevTranslated,
 													 stars[j].prevTranslated)) {
 						stars[i].valid = false;
 						stars[j].valid = false;
@@ -158,11 +163,11 @@ void initStars(void)
 		stars[i].velocity.y = tmp / RAND_MAX / 100.0f - 1 / 200.0f;
 
 		tmp = rand();
-		stars[i].r = tmp / RAND_MAX * (rand() % 255);
+		stars[i].r = tmp / RAND_MAX;
 		tmp = rand();
-		stars[i].g = tmp / RAND_MAX * (rand() % 25);
+		stars[i].g = tmp / RAND_MAX;
 		tmp = rand();
-		stars[i].b = tmp / RAND_MAX * (rand() % 255);
+		stars[i].b = tmp / RAND_MAX;
 
 		tmp = rand();
 		stars[i].x = (float)(tmp / RAND_MAX);
@@ -173,7 +178,7 @@ void initStars(void)
 		bool intersect = true;
 		do {	
 			tmp = rand();
-			stars[i].scale = tmp / RAND_MAX / 35.0f + 0.005f;
+			stars[i].scale = tmp / RAND_MAX / 35.0f + 0.01f;
 			struct matrix  *shift = mtxTranslate(stars[i].x,
 																					 stars[i].y,
 																					 0),
@@ -190,8 +195,13 @@ void initStars(void)
 				int j;
 				intersect = false;
 				for(j = 0; j < i && !intersect; j++) {
-					intersect = polyIntersect(stars[i].prevTranslated,
-																		stars[j].prevTranslated);
+					float maxdist = stars[i].scale + stars[j].scale,
+						dx = stars[i].x - stars[j].x,
+						dy = stars[i].y - stars[j].y,
+						dist = dx * dx + dy * dy;
+					if(dist < maxdist * maxdist)
+						intersect = polyIntersect(stars[i].prevTranslated,
+																			stars[j].prevTranslated);
 				}
 				if(intersect) {
 					stars[i].x += stars[j].scale * 4;
